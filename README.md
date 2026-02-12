@@ -89,11 +89,13 @@ VITE_API_URL=http://localhost:3000
 # Supabase credentials (public)
 VITE_SUPABASE_URL=https://your-supabase-project-url.supabase.co
 VITE_SUPABASE_ANON_KEY=your_public_anon_key_here
-How to use:
+
+### **How to use:**
 Copy .env.demo → .env
 Replace placeholders with your real credentials
 Start your backend and frontend servers
-💻 Getting Started Locally
+
+### **💻 Getting Started Locally**
 Clone the repository
 git clone https://github.com/your-username/assistly-ai-chatbot.git
 cd assistly-ai-chatbot
@@ -112,17 +114,20 @@ npm run dev
 Access app
 Frontend: http://localhost:5173 (Vite default)
 Backend: http://localhost:3000
-📹 Demo / Portfolio
+
+### **📹 Demo / Portfolio**
 If deploying live is not possible, you can showcase the project via:
 Screen recording of chat interactions
 Screenshots of admin dashboard and chat interface
 GIFs for dynamic interactions
 This demonstrates the AI capabilities without exposing keys.
-⚡ Notes
+
+### **⚡ Notes**
 The AI chat won’t work without a valid Groq API key in the backend .env.
 Frontend fetches the backend API using VITE_API_URL.
 All sensitive credentials should remain local; only placeholders should be in the public repo.
-🏆 Key Learning Outcomes
+
+### **🏆 Key Learning Outcomes**
 Built full-stack AI support system with Vue, Supabase, and Groq SDK.
 Implemented retrieval-based AI responses for real-world queries.
 Managed documents, FAQs, user roles, and analytics dashboards.
