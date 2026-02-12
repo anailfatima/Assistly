@@ -1,0 +1,161 @@
+@import "tailwindcss";
+
+:root {
+  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: dark;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background-color: #0f0f0f;
+  color: #e2e8f0;
+}
+
+@theme {
+  --color-primary: #FF1493; /* Dark Pink */
+  --color-secondary: #8A2BE2; /* Violet/Purple */
+  --color-success: #00AA44; /* Dark Green */
+  --color-dark-bg: #0f0f0f;
+  --color-card-bg: #1a1a1a;
+  
+  --radius-2xl: 1.5rem;
+  --radius-3xl: 2rem;
+}
+
+@layer components {
+  /* Unique Neon Glow Effects */
+  .glow-pink {
+    box-shadow: 0 0 15px rgba(255, 20, 147, 0.3), 0 0 5px rgba(255, 20, 147, 0.2);
+  }
+  
+  .glow-purple {
+    box-shadow: 0 0 15px rgba(138, 43, 226, 0.3), 0 0 5px rgba(138, 43, 226, 0.2);
+  }
+  
+  .glow-green {
+    box-shadow: 0 0 15px rgba(0, 170, 68, 0.3), 0 0 5px rgba(0, 170, 68, 0.2);
+  }
+
+  .border-glow-pink {
+    border: 1px solid rgba(255, 20, 147, 0.5);
+    box-shadow: inset 0 0 10px rgba(255, 20, 147, 0.1), 0 0 10px rgba(255, 20, 147, 0.1);
+  }
+
+  .border-glow-purple {
+    border: 1px solid rgba(138, 43, 226, 0.5);
+    box-shadow: inset 0 0 10px rgba(138, 43, 226, 0.1), 0 0 10px rgba(138, 43, 226, 0.1);
+  }
+
+  .border-glow-green {
+    border: 1px solid rgba(0, 170, 68, 0.5);
+    box-shadow: inset 0 0 10px rgba(0, 170, 68, 0.1), 0 0 10px rgba(0, 170, 68, 0.1);
+  }
+  
+  .futuristic-card {
+    @apply bg-[#1a1a1a]/80 backdrop-blur-xl border border-white/10 rounded-3xl transition-all duration-300;
+  }
+  
+  .hover-glow-pink:hover {
+    @apply border-pink-500/50;
+    box-shadow: 0 0 20px rgba(255, 20, 147, 0.3);
+  }
+
+  .hover-glow-purple:hover {
+    @apply border-purple-500/50;
+    box-shadow: 0 0 20px rgba(138, 43, 226, 0.3);
+  }
+  
+  .btn-neon-pink {
+    @apply bg-primary text-white font-bold rounded-2xl transition-all duration-300 transform relative overflow-hidden;
+    box-shadow: 0 0 20px rgba(255, 20, 147, 0.4);
+  }
+  
+  .btn-neon-pink:hover {
+    @apply -translate-y-0.5 scale-[1.02];
+    box-shadow: 0 0 30px rgba(255, 20, 147, 0.6);
+  }
+
+  .btn-neon-purple {
+    @apply bg-secondary text-white font-bold rounded-2xl transition-all duration-300 transform relative overflow-hidden;
+    box-shadow: 0 0 20px rgba(138, 43, 226, 0.4);
+  }
+  
+  .btn-neon-purple:hover {
+    @apply -translate-y-0.5 scale-[1.02];
+    box-shadow: 0 0 30px rgba(138, 43, 226, 0.6);
+  }
+
+  /* 3D Background Bar Styles */
+  .bg-bar {
+    @apply absolute bg-[#121212] border border-white/5 rounded-2xl transition-all duration-1000;
+    box-shadow: 
+      inset 2px 2px 5px rgba(255, 255, 255, 0.05),
+      inset -2px -2px 5px rgba(0, 0, 0, 0.5),
+      0 10px 30px rgba(0, 0, 0, 0.5);
+  }
+
+  .bg-bar-pink { @apply border-pink-500/20 shadow-[0_0_15px_rgba(255,20,147,0.1)]; }
+  .bg-bar-purple { @apply border-purple-500/20 shadow-[0_0_15px_rgba(138,43,226,0.1)]; }
+  .bg-bar-green { @apply border-green-500/20 shadow-[0_0_15px_rgba(0,170,68,0.1)]; }
+}
+
+/* Animations */
+@keyframes pulse-glow {
+  0% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.05); }
+  100% { opacity: 0.5; transform: scale(1); }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3.5s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-15px) rotate(2deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+
+.animate-float-slow {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes drift {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(10px, -10px) rotate(0.5deg); }
+  66% { transform: translate(-5px, 15px) rotate(-0.5deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+@keyframes neon-flow {
+  0% { opacity: 0.3; }
+  50% { opacity: 0.7; }
+  100% { opacity: 0.3; }
+}
+
+.animate-drift {
+  animation: drift 15s ease-in-out infinite;
+}
+
+.animate-neon-flow {
+  animation: neon-flow 4s ease-in-out infinite;
+}
+
+/* Background Mesh with new palette */
+.bg-mesh {
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(255, 20, 147, 0.1) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(138, 43, 226, 0.1) 0px, transparent 50%),
+    radial-gradient(at 50% 50%, rgba(0, 170, 68, 0.05) 0px, transparent 50%);
+}
+
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
