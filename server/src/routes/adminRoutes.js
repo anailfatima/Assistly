@@ -1,9 +1,12 @@
 import express from 'express'
 import multer from 'multer'
 import { 
-  uploadDoc, getDocs, updateDoc, deleteDoc, getChats,
+  uploadDoc, getDocs, updateDoc, deleteDoc, getChats, deleteChat, deleteChats,
+  restoreChats, deleteChatsPermanently,
   getFaqs, addFaq, deleteFaq, getStats
 } from '../controllers/adminController.js'
+
+
 
 
 import { authenticateAdmin } from '../middleware/authMiddleware.js'
@@ -34,6 +37,10 @@ router.get('/docs', getDocs)
 router.put('/docs/:id', updateDoc)
 router.delete('/docs/:id', deleteDoc)
 router.get('/chats', getChats)
+router.post('/chats/delete', deleteChats)
+router.post('/chats/restore', restoreChats)
+router.post('/chats/delete-permanent', deleteChatsPermanently)
+router.delete('/chats/:id', deleteChat)
 
 // FAQ routes
 router.get('/faqs', getFaqs)

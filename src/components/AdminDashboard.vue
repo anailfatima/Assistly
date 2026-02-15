@@ -108,22 +108,73 @@
           <div v-else-if="activeTab === 'history'" key="history" class="max-w-5xl mx-auto space-y-8">
              <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 px-4">
                 <div class="flex items-center space-x-6">
-                    <h3 class="text-xs font-black text-gray-500 uppercase tracking-[0.6em]">Chat History</h3>
-                    <div class="h-8 w-[1px] bg-white/5"></div>
-                    <div class="relative group flex-1 md:w-64">
-                        <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                            <Search class="h-4 w-4 text-gray-600 group-focus-within:text-pink-400 transition-colors" />
-                        </div>
-                        <input v-model="searchQuery" type="text" placeholder="Search logs..." class="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/5 rounded-2xl text-[10px] font-black text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-pink-500/30 transition-all uppercase tracking-[0.2em]" />
-                    </div>
+        <!-- Select All & Bulk Actions -->
+        <div class="flex items-center space-x-4">
+            <label class="flex items-center space-x-2 cursor-pointer group">
+                <div class="relative">
+                    <input type="checkbox" 
+                        :checked="isAllSelected" 
+                        @change="toggleSelectAll"
+                        class="peer appearance-none h-4 w-4 border border-white/20 rounded bg-white/5 checked:bg-pink-500 checked:border-pink-500 transition-all cursor-pointer"
+                    />
+                    <Check class="h-3 w-3 text-black absolute top-0.5 left-0.5 opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" />
                 </div>
-                <div class="flex items-center space-x-4">
-                    <button @click="fetchChatHistory" class="p-3 bg-white/5 rounded-2xl border border-white/5 text-gray-500 hover:text-white transition-all">
-                        <RotateCcw class="h-4 w-4" :class="{'animate-spin': loading}" />
+                <span class="text-[9px] font-black text-gray-500 uppercase tracking-widest group-hover:text-white transition-colors">Select All</span>
+            </label>
+
+            <transition name="fade">
+                <div v-if="selectedChats.length > 0" class="flex items-center space-x-2">
+                    <button 
+                        v-if="!isTrashView"
+                        @click="promptBulkDelete"
+                        class="flex items-center space-x-2 px-3 py-1.5 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 hover:bg-red-500 hover:text-white transition-all"
+                    >
+                        <Trash2 class="h-3 w-3" />
+                        <span class="text-[9px] font-black uppercase tracking-widest">Delete ({{ selectedChats.length }})</span>
                     </button>
-                    <button class="px-6 py-3 bg-white/5 rounded-2xl border border-white/5 text-[9px] font-black text-gray-400 uppercase tracking-widest hover:border-pink-500/30 transition-all">Update History</button>
+                    
+                    <template v-else>
+                         <button 
+                            @click="restoreSelectedChats"
+                            class="flex items-center space-x-2 px-3 py-1.5 bg-green-500/10 border border-green-500/20 rounded-lg text-green-400 hover:bg-green-500 hover:text-white transition-all"
+                        >
+                            <RotateCcw class="h-3 w-3" />
+                            <span class="text-[9px] font-black uppercase tracking-widest">Restore ({{ selectedChats.length }})</span>
+                        </button>
+
+                         <button 
+                            @click="promptBulkDeletePermanent"
+                            class="flex items-center space-x-2 px-3 py-1.5 bg-red-600/10 border border-red-600/20 rounded-lg text-red-500 hover:bg-red-600 hover:text-white transition-all"
+                        >
+                            <X class="h-3 w-3" />
+                            <span class="text-[9px] font-black uppercase tracking-widest">Destroy ({{ selectedChats.length }})</span>
+                        </button>
+                    </template>
                 </div>
-             </div>
+            </transition>
+        </div>
+
+        <div class="h-8 w-[1px] bg-white/5 mx-4 hidden md:block"></div>
+
+        <div class="relative group flex-1">
+            <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                <Search class="h-4 w-4 text-gray-600 group-focus-within:text-pink-400 transition-colors" />
+            </div>
+            <input v-model="searchQuery" type="text" placeholder="Search logs..." class="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/5 rounded-2xl text-[10px] font-black text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-pink-500/30 transition-all uppercase tracking-[0.2em]" />
+        </div>
+    </div>
+    
+    <div class="flex items-center space-x-4">
+        <button 
+            @click="toggleTrashView" 
+            :class="['px-6 py-3 rounded-2xl border text-[9px] font-black uppercase tracking-widest transition-all', isTrashView ? 'bg-red-500/10 border-red-500/30 text-red-400' : 'bg-white/5 border-white/5 text-gray-400 hover:border-pink-500/30']"
+        >{{ isTrashView ? 'Back to Logs' : 'View Trash' }}</button>
+        
+        <button @click="fetchChatHistory" class="p-3 bg-white/5 rounded-2xl border border-white/5 text-gray-500 hover:text-white transition-all">
+            <RotateCcw class="h-4 w-4" :class="{'animate-spin': loading}" />
+        </button>
+    </div>
+</div>
 
              <div class="grid grid-cols-1 gap-3">
                 <div v-for="pair in filteredHistory" :key="pair.id" 
@@ -132,6 +183,16 @@
                 >
                     <div class="absolute inset-0 bg-gradient-to-r from-pink-500/0 via-transparent to-pink-500/0 opacity-0 group-hover:opacity-10 transition-opacity"></div>
                     
+                    <!-- Selection Checkbox -->
+                    <div @click.stop class="relative mr-4 z-20">
+                         <input type="checkbox" 
+                            :value="pair.id"
+                            v-model="selectedChats"
+                            class="peer appearance-none h-5 w-5 border border-white/20 rounded-lg bg-black/50 checked:bg-pink-500 checked:border-pink-500 transition-all cursor-pointer"
+                        />
+                        <Check class="h-3.5 w-3.5 text-black absolute top-1 left-0.5 opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" />
+                    </div>
+
                     <div class="flex items-center space-x-6 flex-1 min-w-0 relative z-10">
                         <!-- Compact Avatar -->
                         <div class="h-12 w-12 rounded-2xl bg-black border border-white/5 p-1 shrink-0 relative shadow-inner">
@@ -142,21 +203,41 @@
 
                         <!-- User Info & Truncated Question -->
                         <div class="flex-1 min-w-0">
-                            <div class="flex items-center space-x-3 mb-1">
+                            <div class="flex items-center space-x-3 mb-0.5">
                                 <p class="text-sm font-black text-white tracking-tighter uppercase group-hover:glow-pink transition-all truncate">
                                     {{ pair.user?.name || 'Anonymous' }}
                                 </p>
                                 <div class="h-1 w-1 rounded-full bg-gray-700"></div>
                                 <span class="text-[9px] font-black text-gray-500 uppercase tracking-widest">{{ formatDate(pair.created_at) }}</span>
                             </div>
+                            <p class="text-[10px] text-gray-400 font-bold mb-1.5 truncate tracking-wide" v-if="pair.user?.email">
+                                {{ pair.user.email }}
+                            </p>
                             <p class="text-[11px] font-medium text-gray-500 truncate italic">
                                 "{{ pair.question }}"
                             </p>
                         </div>
                     </div>
 
-                    <!-- Action Arrow -->
-                    <div class="flex items-center space-x-4 relative z-10 pl-6">
+                    <!-- Action Buttons -->
+                    <div class="flex items-center space-x-3 relative z-10 pl-4">
+                        <button 
+                            @click="(e) => promptDeleteChat(e, pair)"
+                            class="h-10 w-10 btn-glass-danger rounded-xl flex items-center justify-center text-red-400 hover:text-white transition-all shadow-lg group/delete"
+                            title="Delete History"
+                        >
+                            <Trash class="h-4 w-4 transform group-hover/delete:scale-110 transition-transform" />
+                        </button>
+                        
+                        <button 
+                            v-if="isTrashView"
+                            @click.stop="restoreSingleChat(pair)"
+                             class="h-10 w-10 bg-green-500/10 border border-green-500/20 rounded-xl flex items-center justify-center text-green-400 hover:text-white hover:bg-green-500 transition-all shadow-lg group/restore ml-2"
+                             title="Restore"
+                        >
+                            <RotateCcw class="h-4 w-4 transform group-hover/restore:-rotate-180 transition-transform" />
+                        </button>
+
                         <div class="h-10 w-10 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center text-gray-600 group-hover:text-pink-400 group-hover:border-pink-500/30 group-hover:bg-pink-500/5 transition-all shadow-xl">
                             <ChevronRight class="h-5 w-5 transform group-hover:translate-x-0.5 transition-transform" />
                         </div>
@@ -168,6 +249,44 @@
                    <p class="text-[10px] font-black text-gray-500 uppercase tracking-[0.5em]">No Discussion History</p>
                 </div>
              </div>
+
+             <!-- Delete Confirmation Modal -->
+             <transition name="fade">
+                <div v-if="showDeleteModal" class="fixed inset-0 z-[110] flex items-center justify-center p-6 bg-black/90 backdrop-blur-xl">
+                    <div class="bg-[#080808] border border-red-500/30 w-full max-w-sm rounded-[2rem] p-8 shadow-[0_0_50px_rgba(220,38,38,0.2)] relative overflow-hidden">
+                        <div class="absolute inset-0 bg-red-500/5 pointer-events-none"></div>
+                        
+                        <div class="relative z-10 text-center">
+                            <div class="h-16 w-16 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-6">
+                                <Trash class="h-8 w-8 text-red-500" />
+                            </div>
+                            
+                            <h3 class="text-xl font-black text-white uppercase tracking-tight mb-2">Delete {{ deleteTargetId ? 'Chat' : selectedChats.length + ' Chats' }}?</h3>
+                            <p class="text-gray-400 text-xs font-medium leading-relaxed mb-8">
+                                {{ isTrashView 
+                                    ? "This action cannot be undone. These records will be PERMANENTLY destroyed." 
+                                    : "This will move the selected chats to the trash. You can restore them later." 
+                                }}
+                            </p>
+                            
+                            <div class="grid grid-cols-2 gap-4">
+                                <button 
+                                    @click="showDeleteModal = false"
+                                    class="py-3 rounded-xl border border-white/10 text-gray-400 text-[10px] font-black uppercase tracking-widest hover:bg-white/5 hover:text-white transition-all"
+                                >
+                                    Cancel
+                                </button>
+                                <button 
+                                    @click="confirmDeleteChat"
+                                    class="py-3 rounded-xl bg-red-600 text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-red-600/20 hover:bg-red-500 hover:shadow-red-500/40 hover:-translate-y-0.5 transition-all"
+                                >
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+             </transition>
           </div>
         </transition>
 
@@ -236,7 +355,7 @@ import { useRouter } from 'vue-router'
 import { 
   Menu, Bell, Zap, Activity, ChevronRight, 
   Users, Search, Sliders, Cpu, Radio, 
-  Clock, Binary, ArrowUpRight, History, Layers, User, RotateCcw, X
+  Clock, Binary, ArrowUpRight, History, Layers, User, RotateCcw, X, Trash, Check, Trash2
 } from 'lucide-vue-next'
 import Sidebar from './Sidebar.vue'
 import DocumentUpload from './DocumentUpload.vue'
@@ -268,6 +387,29 @@ const adminCount = ref(0)
 const historyData = ref([])
 const selectedChatUser = ref(null)
 const showChatModal = ref(false)
+const showDeleteType = ref(null) // 'chat' or others if needed
+const showDeleteModal = ref(false)
+const deleteTargetId = ref(null)
+const selectedChats = ref([])
+const isTrashView = ref(false)
+const isDeletingPermanently = ref(false)
+
+const isAllSelected = computed(() => {
+    return filteredHistory.value.length > 0 && selectedChats.value.length === filteredHistory.value.length
+})
+
+const toggleTrashView = () => {
+    isTrashView.value = !isTrashView.value
+    fetchChatHistory()
+}
+
+const toggleSelectAll = () => {
+    if (isAllSelected.value) {
+        selectedChats.value = []
+    } else {
+        selectedChats.value = filteredHistory.value.map(c => c.id)
+    }
+}
 
 const dynamicStats = computed(() => [
   { 
@@ -304,30 +446,24 @@ const dynamicStats = computed(() => [
 ])
 
 const historyPairs = computed(() => {
-    const pairs = []
-    // Sort chronological ASC to find pairs
-    const data = [...historyData.value].sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+    // Group by user_id, assuming historyData is sorted DESC by backend (latest first)
+    const uniqueUsers = []
+    const seenUserIds = new Set()
     
-    for (let i = 0; i < data.length; i++) {
-        if (data[i].sender === 'user') {
-            const pair = {
-                id: data[i].id,
-                user: data[i].user,
-                user_id: data[i].user_id,
-                question: data[i].message,
-                answer: 'Awaiting intelligence response...',
-                created_at: data[i].created_at
-            }
-            
-            // Look for the immediate next bot response
-            if (data[i+1] && data[i+1].sender === 'bot') {
-                pair.answer = data[i+1].message
-                i++ // Skip paired bot message
-            }
-            pairs.push(pair)
+    for (const chat of historyData.value) {
+        if (chat.user_id && !seenUserIds.has(chat.user_id)) {
+            seenUserIds.add(chat.user_id)
+            uniqueUsers.push({
+                id: chat.id,
+                user: chat.user,
+                user_id: chat.user_id,
+                question: chat.message, // Using message as question/preview
+                answer: '', 
+                created_at: chat.created_at
+            })
         }
     }
-    return pairs.reverse() // Latest first
+    return uniqueUsers
 })
 
 const filteredHistory = computed(() => {
@@ -376,12 +512,20 @@ const fetchChatHistory = async () => {
     loading.value = true
     try {
         const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
-        const response = await fetch(`${apiUrl}/api/admin/chats`, {
+        const queryParams = isTrashView.value ? '?include_deleted=true' : ''
+
+        const response = await fetch(`${apiUrl}/api/admin/chats${queryParams}`, {
             headers: { 'x-user-id': adminData.id }
         })
         const result = await response.json()
         if (result.success) {
-            historyData.value = result.data
+            // If in trash view, we likely only want to see is_removed=true items
+            if (isTrashView.value) {
+                historyData.value = result.data.filter(c => c.is_removed)
+            } else {
+                historyData.value = result.data.filter(c => !c.is_removed) // Should already be filtered by backend default, but safe to add
+            }
+            
             chatCount.value = result.data.filter(c => c.sender === 'user').length
             showToast('History sync successful', 'success')
         }
@@ -389,6 +533,7 @@ const fetchChatHistory = async () => {
         showToast('Sync failed', 'error')
     } finally {
         loading.value = false
+        selectedChats.value = [] // clear selection on view switch
     }
 }
 
@@ -424,6 +569,114 @@ const handleLogout = () => {
 
 const updateWidth = () => windowWidth.value = window.innerWidth
 
+const promptDeleteChat = (e, chat) => {
+    e.stopPropagation() 
+    deleteTargetId.value = chat.id 
+    isDeletingPermanently.value = isTrashView.value // If in trash, delete button implies permanent
+    showDeleteModal.value = true
+}
+
+const promptBulkDelete = () => {
+    deleteTargetId.value = null 
+    isDeletingPermanently.value = false
+    showDeleteModal.value = true
+}
+
+const promptBulkDeletePermanent = () => {
+    deleteTargetId.value = null
+    isDeletingPermanently.value = true // Explicit permanent delete
+    showDeleteModal.value = true
+}
+
+const confirmDeleteChat = async () => {
+    const idsToDelete = deleteTargetId.value ? [deleteTargetId.value] : selectedChats.value
+    if (idsToDelete.length === 0) return
+    
+    try {
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+        
+        // Determine endpoint based on mode
+        const endpoint = isDeletingPermanently.value 
+            ? `${apiUrl}/api/admin/chats/delete-permanent`
+            : `${apiUrl}/api/admin/chats/delete`
+
+        const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 
+                'x-user-id': adminData.id,
+                'Content-Type': 'application/json' 
+            },
+            body: JSON.stringify({ chatIds: idsToDelete })
+        })
+        
+        const result = await response.json()
+        
+        if (result.success) {
+            historyData.value = historyData.value.filter(c => !idsToDelete.includes(c.id))
+            showToast(isDeletingPermanently.value ? 'Chats permanently destroyed' : 'Chats moved to trash', 'success')
+            selectedChats.value = [] 
+            fetchDashboardStats() 
+        } else {
+            showToast(result.message || 'Delete failed', 'error')
+        }
+    } catch (error) {
+        showToast('Delete operation error', 'error')
+        console.error(error)
+    } finally {
+        showDeleteModal.value = false
+        deleteTargetId.value = null
+        isDeletingPermanently.value = false
+    }
+}
+
+const restoreSelectedChats = async () => {
+    if (selectedChats.value.length === 0) return
+    
+    try {
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+        const response = await fetch(`${apiUrl}/api/admin/chats/restore`, {
+             method: 'POST',
+            headers: { 
+                'x-user-id': adminData.id,
+                'Content-Type': 'application/json' 
+            },
+            body: JSON.stringify({ chatIds: selectedChats.value })
+        })
+        const result = await response.json()
+        
+        if (result.success) {
+            historyData.value = historyData.value.filter(c => !selectedChats.value.includes(c.id))
+            selectedChats.value = []
+            showToast('Chats restored to main list', 'success')
+            fetchDashboardStats()
+        }
+    } catch (error) {
+        showToast('Restore error', 'error')
+    }
+}
+
+const restoreSingleChat = async (chat) => {
+    try {
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+        const response = await fetch(`${apiUrl}/api/admin/chats/restore`, {
+             method: 'POST',
+            headers: { 
+                'x-user-id': adminData.id,
+                'Content-Type': 'application/json' 
+            },
+            body: JSON.stringify({ chatIds: [chat.id] })
+        })
+        const result = await response.json()
+        
+        if (result.success) {
+            historyData.value = historyData.value.filter(c => c.id !== chat.id)
+            showToast('Chat restored', 'success')
+        }
+    } catch (error) {
+         showToast('Restore error', 'error')
+    }
+}
+
 onMounted(() => {
     window.addEventListener('resize', updateWidth)
     fetchDashboardStats()
@@ -451,5 +704,15 @@ onUnmounted(() => window.removeEventListener('resize', updateWidth))
 
 .glow-pink {
     text-shadow: 0 0 10px rgba(219, 39, 119, 0.8);
+}
+
+.btn-glass-danger {
+    background: rgba(220, 38, 38, 0.1);
+    border: 1px solid rgba(220, 38, 38, 0.2);
+}
+.btn-glass-danger:hover {
+    background: rgba(220, 38, 38, 0.2);
+    border-color: rgba(220, 38, 38, 0.4);
+    box-shadow: 0 0 15px rgba(220, 38, 38, 0.2);
 }
 </style>

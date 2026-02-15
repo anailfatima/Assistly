@@ -1,5 +1,5 @@
 import express from 'express'
-import { handleChat, getHistory } from '../controllers/chatController.js'
+import { handleChat, getHistory, deleteChats, restoreChats, deleteChatsPermanently } from '../controllers/chatController.js'
 import { authenticateUser } from '../middleware/authMiddleware.js'
 
 const router = express.Router()
@@ -8,6 +8,9 @@ const router = express.Router()
 router.use(authenticateUser)
 
 router.post('/chat', handleChat)
+router.post('/chat/delete', deleteChats)
+router.post('/chat/restore', restoreChats)
+router.post('/chat/delete-permanent', deleteChatsPermanently)
 router.get('/history', getHistory)
 
 export default router

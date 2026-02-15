@@ -28,10 +28,70 @@
         </div>
 
         <div class="relative z-10 flex items-center space-x-4">
-            <button @click="handleLogout" class="p-4 bg-white/5 rounded-2xl text-gray-500 hover:text-pink-400 hover:bg-white/10 transition-all border border-white/5 hover:border-pink-500/30">
-                <LogOut class="h-5 w-5" />
-            </button>
+            
+            <!-- Selection Controls -->
+            <div v-if="isSelectionMode" class="flex items-center space-x-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                <label class="flex items-center space-x-2 cursor-pointer">
+                    <input type="checkbox" :checked="isAllSelected" @change="toggleSelectAll" class="appearance-none h-4 w-4 border border-white/20 rounded bg-white/5 checked:bg-pink-500 checked:border-pink-500 transition-all" />
+                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">All</span>
+                </label>
+                
+                <button 
+                    v-if="!isTrashView"
+                    @click="deleteSelectedMessages" 
+                    :disabled="selectedMessages.length === 0"
+                    class="px-4 py-2 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 hover:bg-red-500 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all text-[10px] font-black uppercase tracking-widest flex items-center space-x-2"
+                >
+                    <Trash2 class="h-3 w-3" />
+                    <span>Delete ({{ selectedMessages.length }})</span>
+                </button>
 
+                <button 
+                    v-else
+                    @click="restoreSelectedMessages" 
+                    :disabled="selectedMessages.length === 0"
+                    class="px-4 py-2 bg-green-500/10 border border-green-500/20 rounded-xl text-green-400 hover:bg-green-500 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all text-[10px] font-black uppercase tracking-widest flex items-center space-x-2"
+                >
+                    <RotateCcw class="h-3 w-3" />
+                    <span>Restore ({{ selectedMessages.length }})</span>
+                </button>
+
+                 <button 
+                    v-if="isTrashView"
+                    @click="deletePermanently" 
+                    :disabled="selectedMessages.length === 0"
+                    class="px-4 py-2 bg-red-600/10 border border-red-600/20 rounded-xl text-red-500 hover:bg-red-600 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all text-[10px] font-black uppercase tracking-widest flex items-center space-x-2"
+                >
+                    <X class="h-3 w-3" />
+                    <span>Destroy ({{ selectedMessages.length }})</span>
+                </button>
+                
+                <button @click="isSelectionMode = false; selectedMessages = []" class="text-gray-500 hover:text-white transition-colors">
+                    <X class="h-5 w-5" />
+                </button>
+            </div>
+
+            <div v-else class="flex items-center space-x-3">
+                 <!-- Trash Toggle -->
+                <button 
+                    @click="toggleTrashView" 
+                    :class="['p-4 rounded-2xl transition-all border group relative', isTrashView ? 'bg-red-500/10 border-red-500/30 text-red-400' : 'bg-white/5 text-gray-500 hover:text-red-400 hover:bg-white/10 border-white/5 hover:border-red-500/30']"
+                >
+                    <Trash2 class="h-5 w-5" />
+                    <span class="absolute top-14 right-0 bg-black text-white text-[9px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50">
+                        {{ isTrashView ? 'Back to Chat' : 'View Trash' }}
+                    </span>
+                </button>
+
+                <button @click="isSelectionMode = true" class="p-4 bg-white/5 rounded-2xl text-gray-500 hover:text-pink-400 hover:bg-white/10 transition-all border border-white/5 hover:border-pink-500/30 group relative">
+                    <CheckSquare class="h-5 w-5" />
+                    <span class="absolute top-14 right-0 bg-black text-white text-[9px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50">Manage Chats</span>
+                </button>
+
+                <button @click="handleLogout" class="p-4 bg-white/5 rounded-2xl text-gray-500 hover:text-pink-400 hover:bg-white/10 transition-all border border-white/5 hover:border-pink-500/30">
+                    <LogOut class="h-5 w-5" />
+                </button>
+            </div>
         </div>
       </header>
 
@@ -41,11 +101,28 @@
         class="flex-1 overflow-y-auto bg-black/20 pb-40 scrollbar-hide flex flex-col pt-6"
       >
         <div class="px-8 md:px-16 space-y-8 flex-1">
-            <ChatBubble 
-                v-for="(msg, index) in messages" 
-                :key="index" 
-                v-bind="msg" 
-            />
+            <div v-for="(msg, index) in messages" :key="msg.id || index" class="group/item flex items-start w-full relative">
+                
+                <!-- Checkbox Overlay/Side -->
+                <div v-if="isSelectionMode" class="mr-4 mt-4 animate-in fade-in slide-in-from-left-2 duration-300">
+                    <input 
+                        type="checkbox" 
+                        :value="msg.id" 
+                        v-model="selectedMessages"
+                        class="appearance-none h-5 w-5 border border-white/20 rounded-lg bg-black/50 checked:bg-pink-500 checked:border-pink-500 transition-all cursor-pointer"
+                    />
+                </div>
+
+                <ChatBubble 
+                    v-bind="msg" 
+                    :class="['flex-1 min-w-0 transition-opacity duration-300', msg.is_removed ? 'opacity-50 grayscale' : '']"
+                />
+            </div>
+            
+            <div v-if="isTrashView && messages.length === 0" class="flex flex-col items-center justify-center h-48 opacity-50 space-y-4">
+                <Trash2 class="h-12 w-12 text-gray-500" />
+                <p class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500">Trash is empty</p>
+            </div>
 
             <!-- Typing Indicator -->
             <transition name="fade">
@@ -95,8 +172,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick } from 'vue'
-import { Bot, Send, LogOut } from 'lucide-vue-next'
+import { ref, onMounted, nextTick, computed, watch } from 'vue'
+import { Bot, Send, LogOut, CheckSquare, Trash2, X, RotateCcw } from 'lucide-vue-next'
 import ChatBubble from './ChatBubble.vue'
 import { useToast } from '../composables/useToast'
 import { useRouter } from 'vue-router'
@@ -106,14 +183,134 @@ const router = useRouter()
 const inputMsg = ref('')
 const isTyping = ref(false)
 const chatContainer = ref(null)
+const isSelectionMode = ref(false)
+const selectedMessages = ref([])
 
 const userData = JSON.parse(localStorage.getItem('assistly_user') || '{}')
 const messages = ref([])
 
+const isTrashView = ref(false)
+
+const isAllSelected = computed(() => {
+    return messages.value.length > 0 && selectedMessages.value.length === messages.value.length
+})
+
+const toggleTrashView = () => {
+    isTrashView.value = !isTrashView.value
+    isSelectionMode.value = false
+    selectedMessages.value = []
+    fetchHistory()
+}
+
+const toggleSelectAll = () => {
+    if (isAllSelected.value) {
+        selectedMessages.value = []
+    } else {
+        selectedMessages.value = messages.value.map(m => m.id).filter(id => id) // Only select messages with IDs
+    }
+}
+
+const deleteSelectedMessages = async () => {
+    if (selectedMessages.value.length === 0) return
+    
+    try {
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+        
+        const response = await fetch(`${apiUrl}/api/chat/delete`, {
+            method: 'POST',
+            headers: { 
+                'x-user-id': userData.id,
+                'Content-Type': 'application/json' 
+            },
+            body: JSON.stringify({ chatIds: selectedMessages.value })
+        })
+        
+        const result = await response.json()
+        
+        if (result.success) {
+            messages.value = messages.value.filter(m => !selectedMessages.value.includes(m.id))
+            selectedMessages.value = []
+            isSelectionMode.value = false
+            showToast('Messages moved to trash', 'success')
+        } else {
+            showToast(result.message || 'Delete failed', 'error')
+        }
+    } catch (error) {
+        showToast('Delete error', 'error')
+    }
+}
+
+const restoreSelectedMessages = async () => {
+    if (selectedMessages.value.length === 0) return
+    
+    try {
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+        
+        const response = await fetch(`${apiUrl}/api/chat/restore`, {
+            method: 'POST',
+            headers: { 
+                'x-user-id': userData.id,
+                'Content-Type': 'application/json' 
+            },
+            body: JSON.stringify({ chatIds: selectedMessages.value })
+        })
+        
+        const result = await response.json()
+        
+        if (result.success) {
+             // Remove from trash view immediately
+            messages.value = messages.value.filter(m => !selectedMessages.value.includes(m.id))
+            selectedMessages.value = []
+            isSelectionMode.value = false
+            showToast('Messages restored', 'success')
+        } else {
+            showToast(result.message || 'Restore failed', 'error')
+        }
+    } catch (error) {
+        showToast('Restore error', 'error')
+    }
+}
+
+const deletePermanently = async () => {
+    if (selectedMessages.value.length === 0) return
+    
+    if (!confirm('Are you sure? This cannot be undone.')) return
+
+    try {
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+        
+        const response = await fetch(`${apiUrl}/api/chat/delete-permanent`, {
+            method: 'POST',
+            headers: { 
+                'x-user-id': userData.id,
+                'Content-Type': 'application/json' 
+            },
+            body: JSON.stringify({ chatIds: selectedMessages.value })
+        })
+        
+        const result = await response.json()
+        
+        if (result.success) {
+            messages.value = messages.value.filter(m => !selectedMessages.value.includes(m.id))
+            selectedMessages.value = []
+            isSelectionMode.value = false
+            showToast('Messages permanently destroyed', 'success')
+        } else {
+            showToast(result.message || 'Destroy failed', 'error')
+        }
+    } catch (error) {
+        showToast('Destroy error', 'error')
+    }
+}
+
 const fetchHistory = async () => {
     try {
         const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
-        const response = await fetch(`${apiUrl}/api/history`, {
+        
+        // Pass the include_deleted param if in Trash View
+        const queryParams = isTrashView.value ? '?include_deleted=true' : ''
+
+        const response = await fetch(`${apiUrl}/api/history${queryParams}`, {
             headers: { 
                 'x-user-id': userData.id,
                 'Content-Type': 'application/json'
@@ -121,11 +318,29 @@ const fetchHistory = async () => {
         })
         const result = await response.json()
         if (result.success) {
-            messages.value = result.data.map(m => ({
+            // Filter client-side if needed to be absolutely sure what we show
+            // Note: backend should handle 'include_deleted' logic
+            let fetchedMessages = result.data.map(m => ({
+                id: m.id,
                 role: m.sender === 'user' ? 'user' : 'assistant',
                 content: m.message,
-                time: new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                time: new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                is_removed: m.is_removed
             }))
+
+            // If we are in "Trash View", we only want to see the removed items ideally,
+            // OR if the backend returns EVERYTHING when include_deleted=true, we filter here.
+            // Let's assume the user wants check "Trash" = "Only Trash".
+            // The backend returns is_removed=false usually. 
+            // If include_deleted=true, querying standard behavior usually implies getting ALL history including deleted.
+            // Let's filter on the frontend for "Trash view" vs "Normal view" to be explicit.
+            
+            if (isTrashView.value) {
+                messages.value = fetchedMessages.filter(m => m.is_removed)
+            } else {
+                messages.value = fetchedMessages
+            }
+            
             scrollToBottom()
         }
     } catch (error) {
@@ -149,7 +364,10 @@ const sendMessage = async () => {
     if (!inputMsg.value.trim() || isTyping.value) return
     
     const userMsgText = inputMsg.value
+    // Optimistic Update (Temporary ID until confirmed)
+    const tempId = 'temp-' + Date.now()
     messages.value.push({
+        id: tempId,
         role: 'user',
         content: userMsgText,
         time: getTime()
@@ -176,7 +394,14 @@ const sendMessage = async () => {
         const result = await response.json()
         
         if (result.success) {
+            // Update temp ID with real ID if needed
+            const lastUserMsg = messages.value.find(m => m.id === tempId)
+            if (lastUserMsg && result.data.userMessageId) {
+                lastUserMsg.id = result.data.userMessageId
+            }
+
             messages.value.push({
+                id: result.data.id,
                 role: 'assistant',
                 content: result.data.message,
                 time: getTime()
