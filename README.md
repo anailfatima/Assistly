@@ -90,15 +90,12 @@ VITE_API_URL=http://localhost:3000
 VITE_SUPABASE_URL=https://your-supabase-project-url.supabase.co
 VITE_SUPABASE_ANON_KEY=your_public_anon_key_here
 
-**How to use:**
-Copy .env.demo → .env
-Replace placeholders with your real credentials
-Start your backend and frontend servers
+## **How to Use**
 
-### **💻 Getting Started Locally**
-Clone the repository
-git clone https://github.com/your-username/assistly-ai-chatbot.git
-cd assistly-ai-chatbot
+**Copy** `.env.demo` → `.env`  
+**Replace placeholders** with your real credentials  
+**Start** your backend and frontend servers  
+
 Install dependencies
 Backend:
 cd server
