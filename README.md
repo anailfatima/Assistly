@@ -65,6 +65,15 @@ A full-stack **AI-powered customer support platform** that provides **knowledge-
 - Admin can view chat history, number of users, documents, and FAQs.
 
 ---
+### **Backend `.env`**
+
+# Backend server port
+PORT=3000
+
+**Supabase credentials**
+SUPABASE_URL=https://your-supabase-project-url.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
+
 
 ## ⚠️ Environment Variables (`.env`)
 
@@ -72,11 +81,11 @@ To run this project locally, you need to **create a `.env` file** for both front
 Do **not push your `.env` file** to GitHub; it is included in `.gitignore`.
 
 ### **Backend `.env`**
-```env
+
 # Backend server port
 PORT=3000
 
-# Supabase credentials
+**Supabase credentials**
 SUPABASE_URL=https://your-supabase-project-url.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
 
@@ -96,7 +105,7 @@ VITE_SUPABASE_ANON_KEY=your_public_anon_key_here
 **Replace placeholders** with your real credentials  
 **Start** your backend and frontend servers  
 
-Install dependencies
+**Install dependencies**
 Backend:
 cd server
 npm install
@@ -129,3 +138,7 @@ Built full-stack AI support system with Vue, Supabase, and Groq SDK.
 Implemented retrieval-based AI responses for real-world queries.
 Managed documents, FAQs, user roles, and analytics dashboards.
 Learned secure environment variable management and safe deployment practices.
+
+---
+
+
