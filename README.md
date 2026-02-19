@@ -65,37 +65,29 @@ A full-stack **AI-powered customer support platform** that provides **knowledge-
 - Admin can view chat history, number of users, documents, and FAQs.
 
 ---
-### **Backend `.env`**
-
-# Backend server port
-PORT=3000
-
-**Supabase credentials**
-SUPABASE_URL=https://your-supabase-project-url.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
-
 
 ## ⚠️ Environment Variables (`.env`)
 
 To run this project locally, you need to **create a `.env` file** for both frontend and backend.  
 Do **not push your `.env` file** to GitHub; it is included in `.gitignore`.
 
-### **Backend `.env`**
+# **Backend `.env`**
 
-# Backend server port
+### Backend server port
 PORT=3000
 
 **Supabase credentials**
 SUPABASE_URL=https://your-supabase-project-url.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
 
-# Groq AI API key
+### Groq AI API key
 GROQ_API_KEY=your_groq_api_key_here
-Frontend .env
-# API URL for frontend to connect to backend
+
+# Frontend .env
+**API URL for frontend to connect to backend**
 VITE_API_URL=http://localhost:3000
 
-# Supabase credentials (public)
+### Supabase credentials (public)
 VITE_SUPABASE_URL=https://your-supabase-project-url.supabase.co
 VITE_SUPABASE_ANON_KEY=your_public_anon_key_here
 
