@@ -19,7 +19,10 @@ A full-stack **AI-powered customer support platform** that provides **knowledge-
   1. Search documents and FAQs for relevant content.  
   2. Combine context with user question.  
   3. Use **Groq SDK** to generate a grounded AI response.  
-- Reduces hallucination by grounding answers in your own uploaded knowledge base.  
+- Reduces hallucination by grounding answers in your own uploaded knowledge base.
+
+## NOTE
+This project uses **@xenova/transformers** to generate local vector embeddings and **@supabase/supabase-js** to store and query them, enabling semantic search and AI-powered chatbot responses.
 
 ### **Conversation Logging**
 - All chats are stored in Supabase’s `chats` table.  
