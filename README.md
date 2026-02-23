@@ -132,5 +132,77 @@ Managed documents, FAQs, user roles, and analytics dashboards.
 Learned secure environment variable management and safe deployment practices.
 
 ---
+## Chatbot Flow
+### Frontend → Backend
+User types a message in the chat UI and clicks send.
+Frontend sends a POST request to the backend API (e.g., /api/chat) with the message and user ID.
+
+### Backend → Database (Vector Store / Supabase)
+Backend receives the request and stores the user message in the database for history.
+Backend performs RAG (Retrieval-Augmented Generation):
+Queries the database for vector embeddings that match the user message.
+Selects the top K most relevant vectors (chunks of context or documents).
+These vectors are returned to the backend.
+
+### Backend → AI (LLM)
+Backend combines:
+User message
+Retrieved context from the database (top K vectors)
+Sends this combined input to the AI model (LLM API) to generate a response.
+
+### AI → Backend
+The AI processes the input and generates a response.
+Backend receives the AI response.
+Backend can also store the AI response in the database for chat history.
+
+### Backend → Frontend
+Backend sends the AI response back to the frontend as JSON.
+Frontend receives it and updates the chat UI, showing the AI’s answer.
+
+ ## Key Points
+	•	RAG happens in the backend, not the frontend.
+	•	Frontend never directly queries vectors or AI.
+	•	Backend is the “brain”, orchestrating database queries and AI calls.
+	•	Supabase is just the database, storing vectors, chat history, and user info.
+	•	Frontend is purely UI, displaying messages and sending requests.
+
+## Flow Diagram (Text Version)
+**[Frontend (UI)]**
+      |
+      | User sends message
+      v
+**[Backend Server]**
+      |
+      | Store message in DB
+      | Query vector database → Top K vectors (RAG)
+      |
+      v
+**[Database / Vector Store]**
+      |
+      | Returns top K relevant vectors
+      v
+**[Backend Server]**
+      |
+      | Sends user message + vectors to LLM
+      |
+      v
+**[AI Model (LLM)]**
+      |
+      | Generates response
+      v
+**[Backend Server]**
+      |
+      | Stores AI response in DB
+      | Sends response to frontend
+      v
+**[Frontend (UI)]**
+      |
+      | Updates chat window with AI response
+
+
+**In short:**
+Frontend → Backend → Database (RAG) → Backend → AI → Backend → Frontend → UI
+This is why a separate backend is mandatory for Assistly, unlike Expensify, where Supabase can handle everything directly
+
 
 
