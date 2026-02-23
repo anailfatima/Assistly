@@ -132,7 +132,7 @@ Managed documents, FAQs, user roles, and analytics dashboards.
 Learned secure environment variable management and safe deployment practices.
 
 ---
-## Chatbot Flow
+## Assistly Chatbot Flow
 ### Frontend → Backend
 User types a message in the chat UI and clicks send.
 Frontend sends a POST request to the backend API (e.g., /api/chat) with the message and user ID.
@@ -166,41 +166,7 @@ Frontend receives it and updates the chat UI, showing the AI’s answer.
 	•	Supabase is just the database, storing vectors, chat history, and user info.
 	•	Frontend is purely UI, displaying messages and sending requests.
 
-## Flow Diagram (Text Version)
-**[Frontend (UI)]**
-      |
-      | User sends message
-      v
-**[Backend Server]**
-      |
-      | Store message in DB
-      | Query vector database → Top K vectors (RAG)
-      |
-      v
-**[Database / Vector Store]**
-      |
-      | Returns top K relevant vectors
-      v
-**[Backend Server]**
-      |
-      | Sends user message + vectors to LLM
-      |
-      v
-**[AI Model (LLM)]**
-      |
-      | Generates response
-      v
-**[Backend Server]**
-      |
-      | Stores AI response in DB
-      | Sends response to frontend
-      v
-**[Frontend (UI)]**
-      |
-      | Updates chat window with AI response
-
-
-**In short:**
+**Flow:**
 Frontend → Backend → Database (RAG) → Backend → AI → Backend → Frontend → UI
 This is why a separate backend is mandatory for Assistly, unlike Expensify, where Supabase can handle everything directly
 
